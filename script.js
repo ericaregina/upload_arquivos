@@ -5,7 +5,7 @@ let numOfFiles = document.getElementById("num-of-files");
 // Função para salvar os dados dos arquivos no localStorage
 function saveToLocalStorage(fileData) {
   let storedFiles = JSON.parse(localStorage.getItem("uploadedFiles")) || [];
-  
+
   // Verifica se o arquivo já existe para evitar duplicatas
   const exists = storedFiles.some(file => file.name === fileData.name && file.size === fileData.size);
   if (!exists) {
@@ -37,12 +37,25 @@ function loadFromLocalStorage() {
 
 // Função para salvar o arquivo (simulando o download ao clicar)
 function saveFile(file) {
+  // Cria um Blob a partir dos dados do arquivo
+  const byteString = atob(file.data.split(',')[1]);
+  const mimeString = file.data.split(',')[0].split(':')[1].split(';')[0];
+  const ab = new ArrayBuffer(byteString.length);
+  const ia = new Uint8Array(ab);
+  for (let i = 0; i < byteString.length; i++) {
+    ia[i] = byteString.charCodeAt(i);
+  }
+  const blob = new Blob([ab], { type: mimeString });
+
+  // Cria um link de download para o Blob
+  const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
-  a.href = file.data;
+  a.href = url;
   a.download = file.name;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
+  URL.revokeObjectURL(url); // Libera a memória
 }
 
 fileInput.addEventListener("change", () => {
@@ -60,7 +73,7 @@ fileInput.addEventListener("change", () => {
       let fileName = i.name;
       let fileSize = (i.size / 1024).toFixed(1) + "KB";
       let fileData = event.target.result;
-      
+
       if (i.size >= 1024 * 1024) {
         fileSize = (i.size / (1024 * 1024)).toFixed(1) + "MB";
       }
