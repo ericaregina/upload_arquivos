@@ -37,6 +37,7 @@
     margin: auto;
     border-radius: 20px;
     cursor: pointer;
+    border-radius: 20px;
   }
   
   #num-of-files {
